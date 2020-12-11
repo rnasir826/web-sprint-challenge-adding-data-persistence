@@ -1,24 +1,36 @@
 // build your `Task` model here
 
-const db = require("../../data/dbConfig");
 module.exports = {
-  getAll() {
-    return db("Task as t")
-      .leftJoin("Projects as p", "p.project_id", "t.project_id")
-      .select(
-        "t.task_id",
-        "t.description",
-        "t.notes",
-        "t.completed",
-        "p.project_id",
-        "p.project_name"
-      );
-  },
-  findById(id) {
-    return db("tasks").where({ id }).first();
-  },
-  async addTask(task) {
-    const [id] = await db("tasks").insert(task);
-    return this.findById(id);
-  },
-};
+    findTasks,
+    allTasks,
+    addTasks,
+  };
+
+const db = require('../../data/dbConfig');
+
+  // Gets all the tasks 
+  function allTasks() {
+    return db('tasks');
+  }
+  //Finds all tasks for a specific project 
+
+  function findTasks(id) {
+    return db('projects')
+          .join('tasks', 'tasks.project_id', '=', 'projects.id')
+          .select(
+        'projects.project_name',
+        'projects.description',
+        'tasks.description as Task',
+        'projects.completed AS ProjectCompletion',
+        'tasks.completed AS TaskCompletion',
+        'tasks.notes'
+      )
+      .where({ 'projects.id': id });
+  }
+
+  // This adds a task to a project
+  function addTasks(id, task) {
+    return db('tasks')
+      .where({id })
+      .insert(task)
+  }
